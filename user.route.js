@@ -1,17 +1,15 @@
-// user.route.js
-
 const express = require('express');
 const userRoutes = express.Router();
 
-// Require User model in our routes module
 let User = require('./user.model');
+let Transaction = require('./transaction.model');
 
 // Defined store route
-userRoutes.route('/').post(function (req, res) {
+userRoutes.route('/').post((req, res) => {
   let user = new User(req.body);
   user.save()
     .then(user => {
-      res.status(200).json({'user': 'user in added successfully'});
+      res.status(200).json(user);
     })
     .catch(err => {
       res.status(400).send("unable to save to database");
@@ -19,8 +17,8 @@ userRoutes.route('/').post(function (req, res) {
 });
 
 // Defined get data(index or listing) route
-userRoutes.route('/').get(function (req, res) {
-  User.find(function(err, users){
+userRoutes.route('/').get((req, res) => {
+  User.find((err, users) => {
     if(err){
       console.log(err);
     }
@@ -31,16 +29,16 @@ userRoutes.route('/').get(function (req, res) {
 });
 
 // Defined find by id
-userRoutes.route('/:id').get(function (req, res) {
+userRoutes.route('/:id').get((req, res) => {
   let id = req.params.id;
-  User.findById(id, function (err, user){
+  User.findById(id, (err, user) => {
     res.json(user);
   });
 });
 
 //  Defined update route
-userRoutes.route('/:id').put(function (req, res) {
-  User.findById(req.params.id, function(err, user) {
+userRoutes.route('/:id').put((req, res) => {
+  User.findById(req.params.id, (err, user) => {
     if (!user) {
       res.status(404).send("data is not found");
     } else {
@@ -50,7 +48,7 @@ userRoutes.route('/:id').put(function (req, res) {
       user.phone = req.body.phone;
 
       user.save().then(user => {
-        res.json('Update complete');
+        res.json(user);
       })
       .catch(err => {
         res.status(400).send("unable to update the database");
@@ -60,10 +58,20 @@ userRoutes.route('/:id').put(function (req, res) {
 });
 
 // Defined delete | remove | destroy route
-userRoutes.route('/delete/:id').get(function (req, res) {
-  User.findByIdAndRemove({_id: req.params.id}, function(err, user){
+userRoutes.route('/delete/:id').get((req, res) => {
+  User.findByIdAndRemove({_id: req.params.id}, (err, user) => {
     if(err) res.json(err);
     else res.json('Successfully removed');
+  });
+});
+
+userRoutes.route('/:id/balance').get((req, res) => {
+  Transaction.userBalance(req.params.id, (err, balance) => {
+    if (err) {
+      res.status(400).send("unable to find balance");
+    } else {
+      res.json(balance);
+    }
   });
 });
 

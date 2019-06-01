@@ -14,6 +14,10 @@ let User = new Schema({
   },
   phone: {
     type: String
+  },
+  limit: {
+    type: Number,
+    default: 500
   }
 },{
     collection: 'user'
