@@ -1,30 +1,38 @@
 var express = require("express");
 var bodyParser = require("body-parser");
-var mongodb = require("mongodb");
-var ObjectID = mongodb.ObjectID;
+//var mongodb = require("mongodb");
+var express = require('express');
 
-var CONTACTS_COLLECTION = "contacts";
+//var cors = require('cors');
+var mongoose = require('mongoose');
+var config = require('./DB.js');
+var userRoute = require('./user.route');
+var transactionRoute = require('./transaction.route');
+
+
+
 
 var app = express();
+//app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Create a database variable outside of the database connection callback to reuse the connection pool in your app.
-var db;
+app.use('/user', userRoute);
+app.use('/transaction', transactionRoute);
 
-// Connect to the database before starting the application server.
-mongodb.MongoClient.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/test", function (err, client) {
-  if (err) {
-    console.log(err);
-    process.exit(1);
+
+
+mongoose.Promise = global.Promise;
+mongoose.connect(process.env.MONGODB_URI || config.DB, { useNewUrlParser: true })
+  .then(() => {
+    console.log('Database is connected')
+  },
+  err => {
+    console.log('Can not connect to the database'+ err)
   }
+);
 
-  // Save database object from the callback for reuse.
-  db = client.db();
-  console.log("Database connection ready");
-
-  // Initialize the app.
-  var server = app.listen(process.env.PORT || 8080, function () {
-    var port = server.address().port;
-    console.log("App now running on port", port);
-  });
+var server = app.listen(process.env.PORT || 8080, () => {
+  var port = server.address().port;
+  console.log("App now running on port", port);
 });
