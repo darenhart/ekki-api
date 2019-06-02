@@ -12,13 +12,25 @@ userRoutes.route('/').post((req, res) => {
       res.status(200).json(user);
     })
     .catch(err => {
-      res.status(400).send("unable to save to database");
+      res.status(400).send("Não foi possível salvar: " + err);
     });
 });
 
 // Defined get data(index or listing) route
 userRoutes.route('/').get((req, res) => {
   User.find((err, users) => {
+    if(err){
+      console.log(err);
+    }
+    else {
+      res.json(users);
+    }
+  });
+});
+
+// TODO: logged user
+userRoutes.route('/current').get((req, res) => {
+  User.findOne((err, users) => {
     if(err){
       console.log(err);
     }
@@ -35,6 +47,7 @@ userRoutes.route('/:id').get((req, res) => {
     res.json(user);
   });
 });
+
 
 //  Defined update route
 userRoutes.route('/:id').put((req, res) => {
@@ -74,5 +87,16 @@ userRoutes.route('/:id/balance').get((req, res) => {
     }
   });
 });
+
+userRoutes.route('/:id/transactions').get((req, res) => {
+  Transaction.userTransactions(req.params.id, (err, transactions) => {
+    if(err){
+      console.log(err);
+    } else {
+      res.json(transactions);
+    }
+  });
+});
+
 
 module.exports = userRoutes;

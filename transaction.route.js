@@ -9,14 +9,15 @@ let Transaction = require('./transaction.model');
 let User = require('./user.model');
 
 // TODO: add this validation to a middleware "pre" in mongo Schema 
+// TODO: Se for transferido em menos de 2 minutos, o mesmo valor, para o mesmo usuário, cancelar a transação anterior e manter a última.
 // Check duplicate transaction in 2 minutes period
 let checkDuplicated = (transaction) => {
   return new Promise((resolve, reject) => {
     let now = new Date();
-    let twoMinutes = moment(now).subtract(2, "minutes").toDate();
+    let twoMinutes = moment(now).subtract(2, "seconds").toDate();
     let findT = {
-      user: transaction.user,
-      user_favoured: transaction.user_favoured,
+      "user.id": transaction.user,
+      "user_favoured.id": transaction.user_favoured,
       amount: transaction.amount,
       timestamp: {
         $gte: twoMinutes
@@ -38,8 +39,8 @@ let checkDuplicated = (transaction) => {
 
 let checkLimit = (transaction) => {
   return new Promise((resolve, reject) => {
-    User.findById(transaction.user, (err, user) => {
-      Transaction.userBalance(transaction.user, (err, balance) => {
+    User.findById(transaction.user.id, (err, user) => {
+      Transaction.userBalance(transaction.user.id, (err, balance) => {
         if (balance - transaction.amount + user.limit > 0) {
           resolve();
         } else {
@@ -63,24 +64,13 @@ transactionRoutes.route('/').post((req, res) => {
             res.status(200).json(transaction);
           })
           .catch(err => {
-            res.status(400).send("unable to save to database");
+            res.status(400).send("Não foi possível salvar: " + err);
           });
       }, (limit) => {
-        res.status(400).send("Not enought credit. Limit: " + limit);
+        res.status(400).send("Saldo insuficiente. Limit: " + limit);
       });
   }, () => {
-    res.status(400).send("transaction duplicated. Wait 2 min");
-  });
-});
-
-// Defined get data(index or listing) route
-transactionRoutes.route('/').get((req, res) => {
-  Transaction.find((err, transactions) => {
-    if(err){
-      console.log(err);
-    } else {
-      res.json(transactions);
-    }
+    res.status(400).send("Transação duplicada. Aguarde 2 minutos");
   });
 });
 

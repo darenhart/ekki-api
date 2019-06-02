@@ -5,13 +5,27 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 // Define collection and schema for Transaction
 let Transaction = new Schema({
   user: {
-    type: ObjectId
+    id: {
+      type: ObjectId,
+      required: true
+    },
+    name: {
+      type: String,
+    }
   },
   user_favoured: {
-    type: ObjectId
+    id: {
+      type: ObjectId,
+      required: [true, 'Campo Favorecido é obrigatório']
+    },
+    name: {
+      type: String,
+    }
   },
   amount: {
-    type: Number
+    type: Number,
+    required: true,
+    min: [1, 'Valor mínimo é 1 real']
   },
   timestamp: {
     type : Date,
@@ -21,26 +35,41 @@ let Transaction = new Schema({
     collection: 'transaction'
 });
 
-Transaction.statics.userBalance = function (userId, callback) {
-  let transactionFind = {
+let getFilterByUser = (userId) => {
+  return {
     "$or": [{
-      "user": userId
+      "user.id": userId
     }, {
-      "user_favoured": userId
+      "user_favoured.id": userId
     }]
-  };
-  this.model('Transaction').find(transactionFind, (err, transations) => {
+  };  
+};
+
+Transaction.statics.userBalance = function (userId, callback) {
+  this.model('Transaction').find(getFilterByUser(userId), (err, transations) => {
     if (err) {
       callback(err);
     } else {
       let balance = 0;
       transations.map(t => {
-        balance += t.amount * (t.user.equals(userId) ? -1 : 1);
+        balance += t.amount * (t.user.id.equals(userId) ? -1 : 1);
       });
       callback(null, balance);
     }
   });
 };
+
+Transaction.statics.userTransactions = function (userId, callback) {
+  this.model('Transaction').find(getFilterByUser(userId), (err, transations) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null, transations);
+    }
+  });
+};
+
+
 
   /*
 Transaction.pre('save', true, function (next, done) {
