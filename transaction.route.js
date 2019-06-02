@@ -14,10 +14,10 @@ let User = require('./user.model');
 let checkDuplicated = (transaction) => {
   return new Promise((resolve, reject) => {
     let now = new Date();
-    let twoMinutes = moment(now).subtract(2, "seconds").toDate();
+    let twoMinutes = moment(now).subtract(2, "minutes").toDate();
     let findT = {
-      "user.id": transaction.user,
-      "user_favoured.id": transaction.user_favoured,
+      "user.id": transaction.user.id,
+      "user_favoured.id": transaction.user_favoured.id,
       amount: transaction.amount,
       timestamp: {
         $gte: twoMinutes
@@ -26,7 +26,6 @@ let checkDuplicated = (transaction) => {
 
     Transaction.find(findT, (err, transactions) => {
       if (err) {
-        console.log(err);
         reject();
       } else if (transactions.length) {
         reject();
@@ -40,13 +39,17 @@ let checkDuplicated = (transaction) => {
 let checkLimit = (transaction) => {
   return new Promise((resolve, reject) => {
     User.findById(transaction.user.id, (err, user) => {
-      Transaction.userBalance(transaction.user.id, (err, balance) => {
-        if (balance - transaction.amount + user.limit > 0) {
-          resolve();
-        } else {
-          reject(user.limit);
-        }
-      });
+      if (!user) {
+        reject('Usuário não encontrado');
+      } else {
+        Transaction.userBalance(transaction.user.id, (err, balance) => {
+          if (balance - transaction.amount + user.limit > 0) {
+            resolve(balance - transaction.amount);
+          } else {
+            reject("Saldo insuficiente. Limite: " + user.limit);
+          }
+        });
+      }
     });
   });
 }
@@ -58,19 +61,22 @@ transactionRoutes.route('/').post((req, res) => {
   checkDuplicated(transaction)
     .then(() => {
     checkLimit(transaction)
-      .then(() => {
+      .then((balance) => {
         transaction.save()
           .then(transaction => {
-            res.status(200).json(transaction);
+            res.status(200).json({
+              transaction: transaction,
+              balance: balance
+            });
           })
           .catch(err => {
-            res.status(400).send("Não foi possível salvar: " + err);
+            res.status(500).json("Não foi possível salvar: " + err);
           });
-      }, (limit) => {
-        res.status(400).send("Saldo insuficiente. Limit: " + limit);
+      }, (err) => {
+        res.status(500).json(err);
       });
   }, () => {
-    res.status(400).send("Transação duplicada. Aguarde 2 minutos");
+    res.status(500).json("Transação duplicada. Aguarde 2 minutos");
   });
 });
 
