@@ -2,14 +2,14 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var express = require('express');
 
-//var cors = require('cors');
+var cors = require('cors');
 var mongoose = require('mongoose');
 var config = require('./DB.js');
 var userRoute = require('./user.route');
 var transactionRoute = require('./transaction.route');
 
 var app = express();
-//app.use(cors());
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
