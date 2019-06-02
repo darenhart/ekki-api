@@ -1,6 +1,5 @@
 var express = require("express");
 var bodyParser = require("body-parser");
-//var mongodb = require("mongodb");
 var express = require('express');
 
 //var cors = require('cors');
@@ -9,9 +8,6 @@ var config = require('./DB.js');
 var userRoute = require('./user.route');
 var transactionRoute = require('./transaction.route');
 
-
-
-
 var app = express();
 //app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,8 +15,6 @@ app.use(bodyParser.json());
 
 app.use('/user', userRoute);
 app.use('/transaction', transactionRoute);
-
-
 
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.MONGODB_URI || config.DB, { useNewUrlParser: true })
