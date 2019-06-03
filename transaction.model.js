@@ -69,36 +69,4 @@ Transaction.statics.userTransactions = function (userId, callback) {
   });
 };
 
-
-
-  /*
-Transaction.pre('save', true, function (next, done) {
-  var err = 'salvou'
-  next();
-  
-  let now = new Date();
-  let twoMinutes = moment(now).subtract(2, "minutes").toDate();
-  let findT = {
-    user: transaction.user,
-    user_favoured: transaction.user_favoured,
-    amount: transaction.amount,
-    timestamp: {
-      $gte: twoMinutes
-    },
-  };
-
-  Transaction.find(findT, (err, transactions) => {
-    let duplicated = false;
-    if (err) {
-      console.log(err);
-    } else if (transactions.length) {
-      duplicated = true;
-      console.log(transactions);
-    }
-
-    callback(duplicated);
-  });
-});
-  */
-
 module.exports = mongoose.model('Transaction', Transaction);

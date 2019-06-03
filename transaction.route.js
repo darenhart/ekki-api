@@ -8,8 +8,8 @@ const transactionRoutes = express.Router();
 let Transaction = require('./transaction.model');
 let User = require('./user.model');
 
-// TODO: add this validation to a middleware "pre" in mongo Schema 
-// TODO: Se for transferido em menos de 2 minutos, o mesmo valor, para o mesmo usuário, cancelar a transação anterior e manter a última.
+// TODO: move this validation to a middleware "pre" in mongo Schema 
+// TODO: "Se for transferido em menos de 2 minutos, o mesmo valor, para o mesmo usuário, cancelar a transação anterior e manter a última."
 // Check duplicate transaction in 2 minutes period
 let checkDuplicated = (transaction) => {
   return new Promise((resolve, reject) => {
@@ -25,9 +25,7 @@ let checkDuplicated = (transaction) => {
     };
 
     Transaction.find(findT, (err, transactions) => {
-      if (err) {
-        reject();
-      } else if (transactions.length) {
+      if (err || transactions.length) {
         reject();
       } else {
         resolve();
@@ -58,6 +56,7 @@ let checkLimit = (transaction) => {
 transactionRoutes.route('/').post((req, res) => {
   let transaction = new Transaction(req.body);
   
+  // TODO: refactor this validation
   checkDuplicated(transaction)
     .then(() => {
     checkLimit(transaction)

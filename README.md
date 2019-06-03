@@ -10,6 +10,8 @@ Frontend: https://ekki-app-10231.herokuapp.com/
 
 In the project directory, you can run:
 
+Install dependencies: `npm install` <br>
+
 ### `npm serve`
 
 Runs `nodemon server.js`<br>

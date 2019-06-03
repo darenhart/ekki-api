@@ -80,6 +80,7 @@ userRoutes.route('/delete/:id').get((req, res) => {
   });
 });
 
+// User balance
 userRoutes.route('/:id/balance').get((req, res) => {
   Transaction.userBalance(req.params.id, (err, balance) => {
     if (err) {
@@ -90,6 +91,7 @@ userRoutes.route('/:id/balance').get((req, res) => {
   });
 });
 
+// User transactions
 userRoutes.route('/:id/transactions').get((req, res) => {
   Transaction.userTransactions(req.params.id, (err, transactions) => {
     if(err){
