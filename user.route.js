@@ -18,11 +18,12 @@ userRoutes.route('/').post((req, res) => {
 
 // Defined get data(index or listing) route
 userRoutes.route('/').get((req, res) => {
-  User.find((err, users) => {
+  User.find({status:'active'}, (err, users) => {
     if(err){
       console.log(err);
     }
     else {
+      users.shift();
       res.json(users);
     }
   });
@@ -55,10 +56,11 @@ userRoutes.route('/:id').put((req, res) => {
     if (!user) {
       res.status(404).send("data is not found");
     } else {
-      user.id = req.body.id;
-      user.name = req.body.name;
-      user.cpf = req.body.cpf;
-      user.phone = req.body.phone;
+      user.id = req.body.id ? req.body.id : user.id;
+      user.name = req.body.name ? req.body.name : user.name;
+      user.cpf = req.body.cpf ? req.body.cpf : user.cpf;
+      user.phone = req.body.phone ? req.body.phone : user.phone;
+      user.status = req.body.status ? req.body.status : user.status;
 
       user.save().then(user => {
         res.json(user);

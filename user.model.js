@@ -29,10 +29,11 @@ let validateCPF = (cpf) => {
 
 // Define collection and schema for User
 let User = new Schema({
-  // TODO: make unique
   id: {
     type: Number,
-    required: [true, 'Campo ID é obrigatório']
+    required: [true, 'Campo ID é obrigatório'],
+    // TODO: make unique
+    default: Math.floor(Math.random() * 100000) + 1
   },
   name: {
     type: String,
@@ -53,6 +54,10 @@ let User = new Schema({
   limit: {
     type: Number,
     default: 500
+  },
+  status: {
+    type: String,
+    default: 'active'
   }
 },{
     collection: 'user'
